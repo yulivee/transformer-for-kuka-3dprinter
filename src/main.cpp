@@ -87,8 +87,8 @@ void loop() {
     if ( analog_value < 10 ) {
 	    stepper1.setSpeed(0);
     } else {	   
-    // Update the stepper to run at this new speed
-    stepper1.setSpeed(motor_current_speed);
+	    // Update the stepper to run at this new speed
+	    stepper1.setSpeed(motor_current_speed);
     }
 
   }
