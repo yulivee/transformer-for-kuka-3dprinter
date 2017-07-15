@@ -13,8 +13,10 @@ AccelStepper stepper1(AccelStepper::DRIVER, 10, 8);
 #define  SPEED_PIN 6
 
 // Define our maximum and minimum speed in steps per second (scale pot to these)
-#define  MAX_SPEED 1000
-#define  MIN_SPEED 1 //0.1
+#define MAX_SPEED 1000
+#define MIN_SPEED 0 //0.1
+#define MOTOR_CNT 500
+#define PWM_CNT 2001
 
 const int analogInPin = A7;  // Analog input pin that the potentiometer is attached to
 const int analogOutPin = 9; // Analog output pin that the LED is attached to
@@ -22,11 +24,11 @@ const int analogOutPin = 9; // Analog output pin that the LED is attached to
 int sensorValue = 0;        // value read from the pot
 int outputValue = 0;        // value output to the PWM (analog out)
 
-static float motor_current_speed = 0.0;            // Holds current motor speed in steps/second
-static int   motor_analog_read_counter = 500;        // Counts down to 0 to fire analog read
-static int   pwm_analog_read_counter = 5001;    // Counts down to 0 to fire analog read
-static char  sign = 1;                        // Holds -1, 1 or 0 to turn the motor on/off and control direction
-static int   analog_value = 0;                 // Holds raw analog value.
+static float motor_current_speed = 0.0;              // Holds current motor speed in steps/second
+static int   motor_analog_read_counter = MOTOR_CNT;  // Counts down to 0 to fire analog read
+static int   pwm_analog_read_counter = PWM_CNT;      // Counts down to 0 to fire analog read
+static char  sign = 1;                               // Holds -1, 1 or 0 to turn the motor on/off and control direction
+static int   analog_value = 0;                       // Holds raw analog value.
 
 void setup() {
   stepper1.setMaxSpeed(10000.0);
@@ -46,7 +48,7 @@ void loop() {
 	  // delay(1);
 	  pwm_analog_read_counter--;
   } else {
-	  pwm_analog_read_counter = 5001;
+	  pwm_analog_read_counter = PWM_CNT;
 	  // read the analog in value:
 	  sensorValue = analogRead(analogInPin);
 	  // map it to the range of the analog out:
@@ -72,15 +74,23 @@ void loop() {
     motor_analog_read_counter--;
   }
   else {
-    motor_analog_read_counter = 500;
+    motor_analog_read_counter = MOTOR_CNT;
     // Now read the pot (from 0 to 1023)
     analog_value = analogRead(SPEED_PIN);
     // Give the stepper a chance to step if it needs to
     stepper1.runSpeed();
     //  And scale the pot's value from min to max speeds
     motor_current_speed = sign * ((analog_value/1023.0) * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
+
+    // we do not have a clean 0V signal, so to stop the motor we manually
+    // set to speed to 0 if we receive below 10 readings of the ADC
+    if ( analog_value < 10 ) {
+	    stepper1.setSpeed(0);
+    } else {	   
     // Update the stepper to run at this new speed
     stepper1.setSpeed(motor_current_speed);
+    }
+
   }
 
   // This will run the stepper at a constant speed
