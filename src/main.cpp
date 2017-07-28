@@ -1,5 +1,9 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
+#include <QueueList.h>
+
+// Create a Queue for motor_values
+QueueList <int> queue;
 
 // Define the stepper and the pins it will use
 AccelStepper stepper1(AccelStepper::DRIVER, 10, 8);
@@ -81,6 +85,7 @@ void loop() {
     stepper1.runSpeed();
     //  And scale the pot's value from min to max speeds
     motor_current_speed = sign * ((analog_value/1023.0) * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
+    queue.push(motor_current_speed);
 
     // we do not have a clean 0V signal, so to stop the motor we manually
     // set to speed to 0 if we receive below 10 readings of the ADC
