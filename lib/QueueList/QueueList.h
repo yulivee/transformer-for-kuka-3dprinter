@@ -235,13 +235,15 @@ void QueueList<T>::blink () const {
 template<typename T>
 T QueueList<T>::average () {
   T average = 0;
-  link item_node = head;
+  link item_node = tail;
 
   while( item_node != NULL ) {
       average += item_node->item;
       item_node = item_node->next;
   }
   
+  average = average / size;
+
   return average;
 }
 

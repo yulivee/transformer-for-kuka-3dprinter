@@ -91,7 +91,7 @@ void loop() {
     motor_current_speed = sign * ((analog_value/1023.0) * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
     queue.push(motor_current_speed);
 
-    if ( queue.count() == QUEUE_DEPTH ) {
+    if ( queue.count() == QUEUE_DEPTH + 1 ) {
         queue.pop();
     }
 
