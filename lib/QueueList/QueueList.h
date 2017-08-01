@@ -76,6 +76,8 @@ class QueueList {
     // set the printer of the queue.
     void setPrinter (Print & p);
 
+    T average ();
+
   private:
     // exit report method in case of error.
     void exit (const char * m) const;
@@ -240,7 +242,7 @@ T QueueList<T>::average () {
       item_node = item_node->next;
   }
   
-
+  return average;
 }
 
 #endif // _QUEUELIST_H

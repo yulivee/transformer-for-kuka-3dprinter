@@ -3,7 +3,7 @@
 #include <QueueList.h>
 
 // Create a Queue for motor_values
-QueueList <int> queue;
+QueueList <float> queue;
 
 // Define the stepper and the pins it will use
 AccelStepper stepper1(AccelStepper::DRIVER, 10, 8);
@@ -21,20 +21,24 @@ AccelStepper stepper1(AccelStepper::DRIVER, 10, 8);
 #define MIN_SPEED 0 //0.1
 #define MOTOR_CNT 500
 #define PWM_CNT 2001
+#define QUEUE_DEPTH 10
 
 const int analogInPin = A7;  // Analog input pin that the potentiometer is attached to
 const int analogOutPin = 9; // Analog output pin that the LED is attached to
 
-int sensorValue = 0;        // value read from the pot
+int sensorValue = 0;        // value read from the poti
 int outputValue = 0;        // value output to the PWM (analog out)
 
-static float motor_current_speed = 0.0;              // Holds current motor speed in steps/second
+static float motor_speed = 0.0;                      // Holds average motor speed in steps/second
+static float motor_current_speed = 0.0;              // Holds current reading of motor speed in steps/second
 static int   motor_analog_read_counter = MOTOR_CNT;  // Counts down to 0 to fire analog read
 static int   pwm_analog_read_counter = PWM_CNT;      // Counts down to 0 to fire analog read
 static char  sign = 1;                               // Holds -1, 1 or 0 to turn the motor on/off and control direction
 static int   analog_value = 0;                       // Holds raw analog value.
 
 void setup() {
+  //Serial.begin(9600);
+  //queue.setPrinter(Serial);
   stepper1.setMaxSpeed(10000.0);
  
   // Set up the three button inputs, with pullups
@@ -87,13 +91,19 @@ void loop() {
     motor_current_speed = sign * ((analog_value/1023.0) * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
     queue.push(motor_current_speed);
 
+    if ( queue.count() == QUEUE_DEPTH ) {
+        queue.pop();
+    }
+
+    motor_speed = queue.average();
+
     // we do not have a clean 0V signal, so to stop the motor we manually
     // set to speed to 0 if we receive below 10 readings of the ADC
     if ( analog_value < 10 ) {
 	    stepper1.setSpeed(0);
     } else {	   
 	    // Update the stepper to run at this new speed
-	    stepper1.setSpeed(motor_current_speed);
+	    stepper1.setSpeed(motor_speed);
     }
 
   }
