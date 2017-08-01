@@ -230,4 +230,17 @@ void QueueList<T>::blink () const {
   // solution selected due to lack of exit() and assert().
 }
 
+template<typename T>
+T QueueList<T>::average () {
+  T average = 0;
+  link item_node = head;
+
+  while( item_node != NULL ) {
+      average += item_node->item;
+      item_node = item_node->next;
+  }
+  
+
+}
+
 #endif // _QUEUELIST_H
