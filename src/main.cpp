@@ -17,7 +17,8 @@ AccelStepper stepper1(AccelStepper::DRIVER, 10, 8);
 #define  SPEED_PIN 6
 
 // Define our maximum and minimum speed in steps per second (scale pot to these)
-#define MAX_SPEED 1000
+//#define MAX_SPEED 1000
+#define MAX_SPEED 12000
 #define MIN_SPEED 0 //0.1
 #define MOTOR_CNT 500
 #define PWM_CNT 2001
@@ -37,7 +38,6 @@ static char  sign = 1;                               // Holds -1, 1 or 0 to turn
 static int   analog_value = 0;                       // Holds raw analog value.
 
 void setup() {
-  //Serial.begin(9600);
   //queue.setPrinter(Serial);
   stepper1.setMaxSpeed(10000.0);
  
@@ -45,6 +45,7 @@ void setup() {
   pinMode(LEFT_PIN, INPUT_PULLUP);
   pinMode(STOP_PIN, INPUT_PULLUP);
   pinMode(RIGHT_PIN, INPUT_PULLUP);
+
 }
 
 void loop() {
