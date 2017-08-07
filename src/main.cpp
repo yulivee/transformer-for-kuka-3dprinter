@@ -18,10 +18,10 @@ AccelStepper stepper1(AccelStepper::DRIVER, 10, 8);
 
 // Define our maximum and minimum speed in steps per second (scale pot to these)
 #define MAX_SPEED 2000
-#define MIN_SPEED 0 //0.1
+#define MIN_SPEED 0.1 //0.1
 #define MOTOR_CNT 500
 #define PWM_CNT 2001
-#define QUEUE_DEPTH 10
+#define QUEUE_DEPTH 20
 
 const int analogInPin = A7;  // Analog input pin that the potentiometer is attached to
 const int analogOutPin = 9; // Analog output pin that the LED is attached to
@@ -84,26 +84,28 @@ void loop() {
     motor_analog_read_counter = MOTOR_CNT;
     // Now read the pot (from 0 to 1023)
     analog_value = analogRead(SPEED_PIN);
-    // Give the stepper a chance to step if it needs to
-    stepper1.runSpeed();
-    //  And scale the pot's value from min to max speeds
-    motor_current_speed = sign * ((analog_value/1023.0) * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
-    queue.push(motor_current_speed);
-
-    if ( queue.count() == QUEUE_DEPTH + 1 ) {
-        queue.pop();
-    }
-
-    motor_speed = queue.average();
 
     // we do not have a clean 0V signal, so to stop the motor we manually
-    // set to speed to 0 if we receive below 10 readings of the ADC
-    if ( analog_value < 10 ) {
+    // set to speed to 0 if we receive below 103 readings of the ADC
+    // this is the first ~ 1.005 V we ignore
+    if ( analog_value < 103 ) {
 	    stepper1.setSpeed(0);
     } else {	   
+	    // Give the stepper a chance to step if it needs to
+	    stepper1.runSpeed();
+	    //  And scale the pot's value from min to max speeds
+	    motor_current_speed = sign * ((analog_value/1023.0) * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
+	    queue.push(motor_current_speed);
+
+	    if ( queue.count() == QUEUE_DEPTH + 1 ) {
+		queue.pop();
+	    }
+
+	    motor_speed = queue.average();
+
 	    // Update the stepper to run at this new speed
 	    stepper1.setSpeed(motor_speed);
-    }
+	    }
 
   }
 
